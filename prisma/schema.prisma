@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ExerciseLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  telegramId   Int            @unique @map("telegram_id")
+  firstName    String?        @map("first_name")
+  lastName     String?        @map("last_name")
+  isAdmin      Boolean        @default(false) @map("is_admin")
+  password     String?
+  UserExercise UserExercise[]
+}
+
+model Exercise {
+  id            Int            @id @default(autoincrement())
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  level         ExerciseLevel
+  task          String
+  requiresProof Boolean        @map("requires_proof")
+  UserExercise  UserExercise[]
+}
+
+model UserExercise {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  exerciseId Int      @map("exercise_id")
+  userId     Int      @map("user_id")
+  completed  Boolean
+  user       User     @relation(fields: [userId], references: [id])
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+}
